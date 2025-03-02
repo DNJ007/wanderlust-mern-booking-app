@@ -27,8 +27,8 @@ const listingSchema = new Schema({
  
   location: 
   {
-    type: { type: String, default: "Point"},
-    coordinates: { type: [Number]}
+    type: String,
+    required: true
   },
   country: {
     type: String,
@@ -45,8 +45,12 @@ const listingSchema = new Schema({
     ref: "User",
     required: true
   },
+  geometry :{
+    type: { type: String,enum: ["Point"], required: true,default: "Point"},
+    coordinates: { type: [Number],required: true,  default: [0, 0] }
+  }
 });
-
+listingSchema.index({ geometry: "2dsphere" }); 
 // Middleware to delete reviews when a listing is deleted
 listingSchema.post("findOneAndDelete", async (listing) => {
   if (listing) {
