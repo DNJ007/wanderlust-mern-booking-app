@@ -103,4 +103,21 @@
     </div>
 </div>
 
+<script>
+    
+     listingData = {
+        title: "<%= listing.title %>",
+        coordinates: <%- JSON.stringify(listing.geometry ? listing.geometry.coordinates : []) %>, // Ensure it's a valid JS array
+        mapToken: "<%= MAP_TOKEN %>"
+    };
+    console.log(listingData);
+    if (!listingData.coordinates.length ) {
+        console.error("Location coordinates are missing or invalid.");
+    } else {
+        // Ensure lat, lng order for Leaflet
+        listingData.coordinates = [listingData.coordinates[1], listingData.coordinates[0]];
+        console.log("Listing Data:", listingData);
+    }
+</script>
+
 <script src="/js/map.js"></script>
