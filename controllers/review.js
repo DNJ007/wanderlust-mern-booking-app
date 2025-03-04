@@ -17,6 +17,19 @@ module.exports.createReview = async(req, res) => {
 
 module.exports.destroyReview = async(req,res)=>{
     let {id, reviewId} = req.params;
+    // Fetch the review and populate the author field
+    let review = await Review.findById(reviewId).populate("author");
+
+    if (!review) {
+        req.flash("error", "Review not found");
+        return res.redirect(`/listings/${id}`);
+    }
+
+    // Double-check authorization (even though middleware already does this)
+    if (!review.author._id.equals(req.user._id)) {
+        req.flash("error", "You do not have permission to delete this review");
+        return res.redirect(`/listings/${id}`);
+    }
     await Listing.findByIdAndUpdate(id, {$pull : {reviews: reviewId}});
     await Review.findByIdAndDelete(reviewId);
 
