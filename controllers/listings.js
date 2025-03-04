@@ -10,8 +10,19 @@ module.exports.index = async (req,res)=>{
         filter.category = req.query.category;
     }
 
-    const allListings = await Listing.find(filter);
-    res.render("./listings/index.ejs",{allListings});
+    const perPage = 12; // Listings per page
+    const page = parseInt(req.query.page) || 1;
+
+    const listings = await Listing.find(filter)
+        .skip((page - 1) * perPage) // Skip listings from previous pages
+        .limit(perPage); // Limit results to `perPage`
+
+    const count = await Listing.countDocuments(filter);
+
+    res.render("./listings/index.ejs",{allListings: listings,
+        current: page,
+        pages: Math.ceil(count / perPage), // Total pages
+    });
 }
 
 module.exports.renderNewForm = (req,res)=>{    

@@ -31,6 +31,11 @@
             display: flex;
             align-items: center;
         }
+        .active-filter 
+        {
+            opacity: 1 !important;
+            border-bottom: 2px solid black;
+        }
     </style>
      <div id="filters">
         <div class="filter" onclick="filterListings('Trending')">
@@ -78,9 +83,32 @@
             <p>Boats</p>
         </div>
         <script>
-            function filterListings(category) {
-                window.location.href = `/listings?category=${category}`;
+            function setActiveFilter(category) 
+            {
+                let filters = document.querySelectorAll(".filter");
+                filters.forEach(filter => filter.classList.remove("active-filter"));
+                
+                let activeElement = [...filters].find(filter => filter.innerText.trim() === category);
+                if (activeElement) {
+                    activeElement.classList.add("active-filter");
+                }
             }
+
+            function filterListings(category) 
+            {
+                if (!category) return;
+                setActiveFilter(category);
+
+                fetch(`/listings?category=${category}`)
+                .then(response => response.text())
+                .then(html => {
+                document.querySelector(".row").innerHTML = new DOMParser()
+                    .parseFromString(html, "text/html")
+                    .querySelector(".row").innerHTML;
+                })
+                .catch(err => console.error("Error fetching filtered listings:", err));
+            }
+
         </script>
         <div class="tax-toggle">
             <div class="form-check-reverse form-switch">
@@ -112,8 +140,9 @@
             <% } %> 
             </a>
         <% } %>
+        
     </div>
-    
+<%- include("../partials/pagination") %>
 
 
 <script>
@@ -125,10 +154,11 @@
     });
     let taxSwitch = document.getElementById("flexSwitchCheckDefault");
     taxSwitch.addEventListener("click",()=>{
+        event.preventDefault();
         let taxInfo = document.getElementsByClassName("tax-info");
-        for(info of taxInfo)
+        for(let info of taxInfo)
         {
-            if(info.style.display != "inline")
+            if(info.style.display === "none")
             {
                 info.style.display = "inline";
             }
@@ -140,3 +170,4 @@
         }
     });
 </script>
+
